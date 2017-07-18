@@ -53,7 +53,7 @@ in
         fsType = "ext2";
       };
       "/" = {
-        device = "/dev/disk/by-label/NIXOS_SD";
+        device = "/dev/mmcblk1p2";
         fsType = "ext4";
       };
     };
@@ -71,6 +71,8 @@ in
         bootSizeBlocks=$((${toString config.sdImage.bootSize} * 1024 * 1024 / 512))
         imageSize=$((rootSizeBlocks * 512 + bootSizeBlocks * 512 + 20 * 1024 * 1024))
         truncate -s $imageSize $out
+
+        echo "Preparing to write bootcmd: rsb: $rootSizeBlocks, $bootSizeBlocks, $imageSize"
 
         # type=b is 'W95 FAT32', type=83 is 'Linux'.
         sfdisk $out <<EOF

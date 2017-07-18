@@ -13,6 +13,7 @@ in
 {
   imports = [
     ../../profiles/installation-device.nix
+    ../../profiles/minimal.nix
     ./sd-image.nix
   ];
 
@@ -25,8 +26,8 @@ in
   boot.loader.grub.enable = false;
   boot.loader.generic-extlinux-compatible.enable = true;
   boot.kernelPackages = linuxPackages_4_11-nanopim3;
-
-  boot.kernelParams = ["console=ttyS0,115200n8" "console=tty0"];
+  boot.initrd.availableKernelModules = [ "dm_mod" ];
+  boot.kernelParams = ["earlyprintk" "console=ttySAC0,115200n8" "console=ttyS1"];
   boot.consoleLogLevel = 7;
 
   nixpkgs.config = {
@@ -55,6 +56,7 @@ in
     };
   };
    };
+  services.avahi.enable = true;
 
   # FIXME: this probably should be in installation-device.nix
   users.extraUsers.root.initialHashedPassword = "";
@@ -131,23 +133,18 @@ in
         echo "Starting to probe boot. OUT is: $out"
         echo "nanopi: $(ls -la)"
         echo "trying to run nano-shot load: ${nanopi-load}/bin/nanopi-load"
-
         echo "$(${nanopi-load}/bin/nanopi-load -o u-boot-nsih.bin ${patchedUboot}/u-boot.bin 0x43bffe00)"
         echo "nanoshit load ok"
-        cp ${bl1-nanopi-m3} boot/bl1.bin
-        cp u-boot-nsih.bin boot/u-boot-nish.bin
-        cp ${configTxt} boot/config.txt
+        #cp ${bl1-nanopi-m3} boot/bl1.bin
+        #cp u-boot-nsih.bin boot/u-boot-nish.bin
+        #cp ${configTxt} boot/config.txt
         echo "Copying config"
-        dd if=${bl1-nanopi-m3} of=$out seek=1
-        dd if=u-boot-nsih.bin of=$out seek=64
+        ${extlinux-conf-builder} -t 3 -c ${config.system.build.toplevel} -d ./boot
+        echo "$out is: $(ls -la $out)"
+        dd conv=notrunc if=${bl1-nanopi-m3} of=$out seek=1
+        dd conv=notrunc if=u-boot-nsih.bin of=$out seek=64
+        echo "$out is: $(ls -la $out)"
         echo "The Config is: ${config.system.build.toplevel}"
-	echo "The Config has: $(ls -la ${config.system.build.toplevel})"
-        mkdir boot/boot
-        cp ${config.system.build.toplevel}/kernel boot/boot/Image
-        cp ${config.system.build.toplevel}/dtbs/nexell/s5p6818-nanopi-m3.dtb boot/boot/s5p6818-nanopi-m3.dtb
-        cp ${config.system.build.toplevel}/initrd boot/boot/initrd.img
-        ${extlinux-conf-builder} -t 3 -c ${config.system.build.toplevel} -d ./boot/boot
-        echo "Finished. OUT is: $out"
       '';
   };
 }

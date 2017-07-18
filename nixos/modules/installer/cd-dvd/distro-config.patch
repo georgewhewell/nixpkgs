@@ -8,10 +8,10 @@ index 0e221eb..f60ebc8 100644
  CONFIG_OF_EMBED=y
 +CONFIG_SPL=y
 diff --git a/include/configs/s5p6818_nanopim3.h b/include/configs/s5p6818_nanopim3.h
-index d899d36..e12d30e 100644
+index d899d36..8230486 100644
 --- a/include/configs/s5p6818_nanopim3.h
 +++ b/include/configs/s5p6818_nanopim3.h
-@@ -100,11 +100,15 @@
+@@ -100,7 +100,6 @@
   *	U-Boot Environments
   */
  /* refer to common/env_common.c	*/
@@ -19,44 +19,32 @@ index d899d36..e12d30e 100644
  
  /*-----------------------------------------------------------------------
   * Miscellaneous configurable options
-  */
-+#define CONFIG_MENU
-+#define CONFIG_MENU_SHOW
-+#define CONFIG_CMD_BOOTMENU
-+#define CONFIG_PXE
-+
- #ifdef CONFIG_SYS_PROMPT
- #undef CONFIG_SYS_PROMPT
- /* Monitor Command Prompt   */
-@@ -279,17 +283,28 @@
+@@ -279,17 +278,18 @@
  /*-----------------------------------------------------------------------
   * ENV
   */
+-#define CONFIG_BOOTARGS \
+-    "console=ttySAC0,115200n8 initrd=0x49000000,0x400000 root=/dev/mmcblk1p1 console=tty1"
 +#include <config_distro_defaults.h>
 +#define BOOT_TARGET_DEVICES(func) \
 +	func(MMC, mmc, 1) \
 +        func(MMC, mmc, 0)
 +#include <config_distro_bootcmd.h>
-+
- #define CONFIG_BOOTARGS \
-     "console=ttySAC0,115200n8 initrd=0x49000000,0x400000 root=/dev/mmcblk1p1 console=tty1"
  
  #define CONFIG_EXTRA_ENV_SETTINGS	\
 -			"fdt_high=0xffffffffffffffff"
 -
-+         "fdt_addr_r=0x4a000000\0" \
+-#define CONFIG_BOOTCOMMAND	\
+-	"ext4load mmc 0:1 0x48000000 boot/Image; " \
+-	"mw 0x49000000 0 0x400000; " \
+-	"ext4load mmc 0:1 0x49000000 boot/initrd.img; " \
+-	"ext4load mmc 0:1 0x4a000000 boot/s5p6818-nanopi-m3.dtb; " \
+-	"booti 0x48000000 - 0x4a000000"
 +         "ramdisk_addr_r=0x49000000\0" \
 +         "kernel_addr_r=0x48000000\0" \
-+         "pxe_addr_r=1000\0" \
-+	"fdt_high=0xffffffffffffffff"
-+/*
- #define CONFIG_BOOTCOMMAND	\
-+	"echo Running BOOTCOMMAND" \
- 	"ext4load mmc 0:1 0x48000000 boot/Image; " \
- 	"mw 0x49000000 0 0x400000; " \
- 	"ext4load mmc 0:1 0x49000000 boot/initrd.img; " \
- 	"ext4load mmc 0:1 0x4a000000 boot/s5p6818-nanopi-m3.dtb; " \
- 	"booti 0x48000000 - 0x4a000000"
--
-+*/
++         "script_addr_r=0x47000000\0" \
++         "fdtfile=nexell/s5p6818-nanopi-m3.dtb\0" \
++         "fdt_addr_r=0x4a000000\0" \
++	 "fdt_high=0xffffffffffffffff"
+ 
  #endif /* __CONFIG_H__ */

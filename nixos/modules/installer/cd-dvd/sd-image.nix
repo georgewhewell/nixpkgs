@@ -50,7 +50,7 @@ in
     fileSystems = {
       "/boot" = {
         device = "/dev/disk/by-label/NIXOS_BOOT";
-        fsType = "vfat";
+        fsType = "ext2";
       };
       "/" = {
         device = "/dev/disk/by-label/NIXOS_SD";
@@ -63,7 +63,7 @@ in
     system.build.sdImage = pkgs.stdenv.mkDerivation {
       name = "sd-image-${pkgs.stdenv.system}.img";
 
-      buildInputs = with pkgs; [ dosfstools e2fsprogs mtools libfaketime utillinux ];
+      buildInputs = with pkgs; [ e2tools dosfstools e2fsprogs mtools libfaketime utillinux ];
 
       buildCommand = ''
         # Create the image file sized to fit /boot and /, plus 20M of slack
@@ -77,7 +77,7 @@ in
             label: dos
             label-id: 0x2178694e
 
-            start=8M, size=$bootSizeBlocks, type=b, bootable
+            start=8M, size=$bootSizeBlocks, type=83, bootable
             start=${toString (8 + config.sdImage.bootSize)}M, type=83
         EOF
 
@@ -88,14 +88,14 @@ in
         # Create a FAT32 /boot partition of suitable size into bootpart.img
         eval $(partx $out -o START,SECTORS --nr 1 --pairs)
         truncate -s $((SECTORS * 512)) bootpart.img
-        faketime "1970-01-01 00:00:00" mkfs.vfat -i 0x2178694e -n NIXOS_BOOT bootpart.img
+        faketime "1970-01-01 00:00:00" mkfs.ext2 -L NIXOS_BOOT bootpart.img
 
         # Populate the files intended for /boot
         mkdir boot
         ${config.sdImage.populateBootCommands}
 
         # Copy the populated /boot into the SD image
-        (cd boot; mcopy -bpsvm -i ../bootpart.img ./* ::)
+        (cd boot; find . -type f -exec e2cp -apv {} ../bootpart.img: \;)
         dd conv=notrunc if=bootpart.img of=$out seek=$START count=$SECTORS
       '';
     };

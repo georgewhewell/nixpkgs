@@ -1,0 +1,22 @@
+{ stdenv, fetchFromGitHub, buildLinux } :
+
+buildLinux rec {
+
+  version = "4.11-nanopim3";
+
+  #defconfig = "nanopi_m3_defconfig";
+  configfile = ./nanopim3_defconfig;
+  src = fetchFromGitHub {
+    owner = "rafaello7";
+    repo = "nanopi-m3-linux";
+    rev = "2ac1c187e298ae149a0a33ed10cf6a3882d08a6c";
+    sha256 = "0r5j2pc42ws3w3im0a9c6bh01czz5kapqrqp0ik9ra823cw73lxr";
+  };
+
+  allowImportFromDerivation = true;
+  kernelPatches = [
+    ./revert-cross-compile.patch
+  ];
+
+}
+

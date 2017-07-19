@@ -12,9 +12,11 @@ let
 in
 {
   imports = [
-    ../../profiles/installation-device.nix
     ../../profiles/minimal.nix
+    ../../profiles/clone-config.nix
+    ./channel.nix
     ./sd-image.nix
+    ./../../../../users.nix
   ];
 
   assertions = lib.singleton {
@@ -56,7 +58,12 @@ in
     };
   };
    };
+
   services.avahi.enable = true;
+  services.openssh.enable = true;
+
+  networking.hostName = "nanopim3-nix";
+  networking.networkmanager.enable = true;
 
   # FIXME: this probably should be in installation-device.nix
   users.extraUsers.root.initialHashedPassword = "";
@@ -70,7 +77,7 @@ in
           rev = "bec6d06d29da2dfe20541d88795adb5d707c2a17";
           sha256 = "08phny3g9q8zv0782a8idc75i8cr4kx9asl636lfz2ipjfjxq52i";
         };
-        patches = [ ./distro-config.patch ./distro-config-header.patch ];
+        patches = [ ./distro-config.patch ];
         defconfig = "s5p6818_nanopim3_defconfig";
         targetPlatforms = ["aarch64-linux"];
         filesToInstall = ["u-boot.bin"];
@@ -95,11 +102,11 @@ in
   ];
 
   buildPhase = ''
-   make CROSS_TOOL=${pkgs.gcc}/bin/ OBJCOPY=${pkgs.binutils}/bin/objcopy
+    make CROSS_TOOL=${pkgs.gcc}/bin/ OBJCOPY=${pkgs.binutils}/bin/objcopy
   '';
 
   installPhase = ''
-   cp out/bl1-drone.bin $out
+    cp out/bl1-drone.bin $out
   '';
 
   hardeningDisable = [ "all" ];

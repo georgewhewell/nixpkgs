@@ -25,6 +25,7 @@ with lib;
     security.pam.services.su.forwardXAuth = lib.mkForce false;
 
     fonts.fontconfig.enable = false;
+    networking.networkmanager.noXlibs = lib.mkForce true;
 
     nixpkgs.config.packageOverrides = pkgs: {
       dbus = pkgs.dbus.override { x11Support = false; };

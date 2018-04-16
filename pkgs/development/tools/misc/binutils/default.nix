@@ -64,6 +64,10 @@ stdenv.mkDerivation rec {
 
     # https://sourceware.org/bugzilla/show_bug.cgi?id=22868
     ./gold-symbol-visibility.patch
+
+    # Version 2.30 introduced strict requirements on ELF relocations which cannot
+    # be satisfied on aarch64 platform.
+    ./relax-R_AARCH64_ABS32-R_AARCH64_ABS16-absolute.patch
   ];
 
   outputs = [ "out" "info" "man" ];

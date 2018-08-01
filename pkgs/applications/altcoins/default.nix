@@ -49,6 +49,8 @@ rec {
 
   ethsign = callPackage ./ethsign { };
 
+  eos = callPackage ./eos.nix { };
+
   freicoin = callPackage ./freicoin.nix { boost = boost155; };
   go-ethereum = callPackage ./go-ethereum.nix {
     buildGoPackage = buildGo110Package;

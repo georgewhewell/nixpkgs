@@ -1,21 +1,23 @@
 {
   callPackage,
+  fetchFromGitHub,
+  lib,
   nixosTests,
   ...
 }@args:
 
-callPackage ./generic.nix args {
+(callPackage ./generic.nix args {
   # You have to ensure that in `pkgs/top-level/linux-kernels.nix`
   # this attribute is the correct one for this package.
   kernelModuleAttribute = "zfs_unstable";
   # check the release notes for compatible kernels
-  kernelCompatible = kernel: kernel.kernelOlder "6.16";
+  kernelCompatible = kernel: kernel.kernelOlder "6.17";
 
   # this package should point to a version / git revision compatible with the latest kernel release
   # IMPORTANT: Always use a tagged release candidate or commits from the
   # zfs-<version>-staging branch, because this is tested by the OpenZFS
   # maintainers.
-  version = "2.3.3";
+  version = "2.3.4-staging";
   # rev = "";
 
   tests = {
@@ -28,4 +30,11 @@ callPackage ./generic.nix args {
     This is "unstable" ZFS, and will usually be a pre-release version of ZFS.
     It may be less well-tested and have critical bugs.
   '';
-}
+}).overrideAttrs(o: {
+ src = fetchFromGitHub {
+   owner = "fossdd";
+   repo = "zfs";
+   rev = "6.16-meta";
+   sha256 = "sha256-k4Z39EflU5WU3pPZwaNl3RxASeshpDtj+zugSILWsvs=";
+ };
+})
